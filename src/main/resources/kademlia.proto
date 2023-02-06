@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package KademliaProto;
+
+option java_multiple_files = true;
+option java_package = "kad.generated";
+option java_outer_classname = "KademliaProto";
+
+service Kademlia {
+    rpc ping(Ping) returns (Ping);
+    rpc store(StorableValue) returns (RequestStatus);
+    rpc findNode(KadID) returns (NodeInfo);
+    rpc findValue(Value) returns (foundValue);
+    rpc broadcastMessage(Message) returns (RequestStatus);
+    rpc message(Message) returns (Message);
+
+    //bootstrapping RPCs
+
+    // join with proof of work challenge
+    rpc joinRequest(NodeInfo) returns (SecurityChallenge);
+	rpc joinValidate(SecurityChallenge) returns (stream NodeInfo);
+
+	// simplejoin
+    rpc join(NodeInfo) returns (stream NodeInfo); // first is own, then its N closestNodes
+    rpc getBlockChain(Ping) returns (stream foundValue);
+    rpc getTransactionPool(Ping) returns (stream foundValue);
+
+}
+
+message NodeInfo {
+    bytes ID = 1;
+    string IP = 2;
+    int32 port = 3;
+}
+
+message KadID {
+	bytes id = 1;
+}
+
+message Ping {
+	bytes id = 1;
+	
+	string IP = 2;
+    int32 port = 3;
+}
+
+message Value {
+    bytes key = 1;
+    string hash = 2;
+}
+
+message StorableValue {
+    bytes key = 1;
+    string value = 2;
+}
+
+message RequestStatus {
+	bool status = 1;
+}
+
+message Message {
+	int32 senderID = 1;
+	string senderAddress= 2;
+	int32 senderPort = 3;
+
+
+	int32 messageType = 4;
+	int32 messageID = 5;
+	int64 timestamp = 6;
+	string msg = 7;
+}
+
+
+message foundValue {
+  	bool isFound = 1; 
+  	bytes key = 2;
+  	string value = 3;
+
+  	bytes nodeID = 4;
+  	string nodeAdress = 5;
+  	int32 port = 6;
+}
+
+message SecurityChallenge {
+	int32 challengedID = 1;
+	int64 challenge = 2;
+	int32 solution = 3;
+
+	string nodeAdress = 5;
+  	int32 port = 6;
+}
